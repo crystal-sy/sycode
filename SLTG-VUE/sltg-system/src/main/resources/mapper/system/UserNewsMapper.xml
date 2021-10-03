@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sltg.system.mapper.UserNewsMapper">
+    <resultMap type="UserNews" id="UserNewsResult">
+        <result property="newsId"            column="news_id"       />
+        <result property="userId"            column="user_id"       />
+        <result property="newsTitle"         column="news_title"    />
+        <result property="detectionPercent"  column="detection_percent" />
+        <result property="detectionType"     column="detection_type"  />
+        <result property="newsPath"          column="news_path"       />
+        <result property="createTime"        column="create_time"     />
+        <result property="del_flag"          column="delFlag"     />
+        <result property="updateBy"          column="update_by"       />
+        <result property="updateTime"        column="update_time"     />
+        <result property="remark"            column="remark"          />
+    </resultMap>
+    
+    <sql id="selectUserNewsVo">
+        select news_id, user_id, news_title, detection_percent, detection_type, news_path, create_time, del_flag, update_by, update_time, remark
+		from sys_user_news
+    </sql>
+    
+    <select id="selectUserNewsList" parameterType="UserNews" resultMap="UserNewsResult">
+        <include refid="selectUserNewsVo"/>
+        where user_id = #{userId}
+        <if test="newsTitle != null and newsTitle != ''">
+            AND news_title like concat('%', #{newsTitle}, '%')
+        </if>
+        <if test="detectionType != null and detectionType != ''">
+            AND detection_type = #{detectionType}
+        </if>
+    </select>
+
+    <select id="queryUserNewsById" parameterType="Long" resultMap="UserNewsResult">
+        <include refid="selectUserNewsVo"/>
+        where news_id = #{newsId}
+    </select>
+</mapper>

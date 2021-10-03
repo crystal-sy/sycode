@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sltg.system.mapper.SysOperateLogMapper">
+
+	<resultMap type="SysOperateLog" id="SysOperateLogResult">
+		<id     property="operateId"       column="operate_id"       />
+		<result property="title"           column="title"            />
+		<result property="businessType"    column="business_type"    />
+		<result property="method"          column="method"           />
+		<result property="requestMethod"   column="request_method"   />
+		<result property="operateType"     column="operate_type"     />
+		<result property="operateName"     column="operate_name"     />
+		<result property="operateUrl"      column="operate_url"      />
+		<result property="operateIp"       column="operate_ip"       />
+		<result property="operateLocation" column="operate_location" />
+		<result property="operateParam"    column="operate_param"    />
+		<result property="jsonResult"      column="json_result"      />
+		<result property="status"          column="status"           />
+		<result property="errorMsg"        column="error_msg"        />
+		<result property="operateTime"     column="operate_time"     />
+	</resultMap>
+
+	<sql id="selectOperateLogVo">
+        select operate_id, title, business_type, method, request_method, operate_type, operate_name, operate_url, operate_ip, operate_location, operate_param, json_result, status, error_msg, operate_time
+        from sys_operate_log
+    </sql>
+    
+	<insert id="insertOperateLog" parameterType="SysOperateLog">
+		insert into sys_operate_log(title, business_type, method, request_method, operate_type, operate_name, operate_url, operate_ip, operate_location, operate_param, json_result, status, error_msg, operate_time)
+        values (#{title}, #{businessType}, #{method}, #{requestMethod}, #{operateType}, #{operateName}, #{operateUrl}, #{operateIp}, #{operateLocation}, #{operateParam}, #{jsonResult}, #{status}, #{errorMsg}, sysdate())
+	</insert>
+	
+	<select id="selectOperateLogList" parameterType="SysOperateLog" resultMap="SysOperateLogResult">
+		<include refid="selectOperateLogVo"/>
+		<where>
+			<if test="title != null and title != ''">
+				AND title like concat('%', #{title}, '%')
+			</if>
+			<if test="businessType != null and businessType != ''">
+				AND business_type = #{businessType}
+			</if>
+			<if test="businessTypes != null and businessTypes.length > 0">
+			    AND business_type in
+			    <foreach collection="businessTypes" item="businessType" open="(" separator="," close=")">
+		 			#{businessType}
+		        </foreach> 
+			</if>
+			<if test="status != null">
+				AND status = #{status}
+			</if>
+			<if test="operateName != null and operateName != ''">
+				AND operate_name like concat('%', #{operateName}, '%')
+			</if>
+			<if test="params.beginTime != null and params.beginTime != ''"><!-- 开始时间检索 -->
+				and date_format(operate_time,'%y%m%d') &gt;= date_format(#{params.beginTime},'%y%m%d')
+			</if>
+			<if test="params.endTime != null and params.endTime != ''"><!-- 结束时间检索 -->
+				and date_format(operate_time,'%y%m%d') &lt;= date_format(#{params.endTime},'%y%m%d')
+			</if>
+		</where>
+		order by operate_id desc
+	</select>
+	
+	<delete id="deleteOperateLogByIds" parameterType="Long">
+ 		delete from sys_operate_log where operate_id in
+ 		<foreach collection="array" item="operateId" open="(" separator="," close=")">
+ 			#{operateId}
+        </foreach> 
+ 	</delete>
+ 	
+ 	<select id="selectOperateLogById" parameterType="Long" resultMap="SysOperateLogResult">
+		<include refid="selectOperateLogVo"/>
+		where operate_id = #{operateId}
+	</select>
+	
+	<update id="cleanOperateLog">
+        truncate table sys_operate_log
+    </update>
+
+</mapper> 
